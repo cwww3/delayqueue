@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"delayqueue"
 	"encoding/json"
 	"fmt"
+	"github.com/cwww3/delayqueue"
 	"github.com/redis/go-redis/v9"
 	"time"
 	"unsafe"
