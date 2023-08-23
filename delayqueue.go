@@ -25,7 +25,7 @@ const (
 const (
 	migrationCount = 50
 	taskCap        = 100
-	piord          = 200 //ms
+	interval       = 200 //ms
 )
 
 type Run func(ctx context.Context, value string) error
@@ -157,14 +157,14 @@ func (dq *DelayQueue) Start(ctx context.Context) {
 			select {
 			case <-ctx.Done():
 				return
-			case <-time.After(time.Millisecond * 200):
+			case <-time.After(time.Millisecond * interval):
 				// 为了支持多实例部署 先简单的通过轮询的方式实现
 				for {
 					// watch + pipeline => LUA脚本实现
 					err := dq.client.Watch(ctx, func(tx *redis.Tx) error {
 						now := time.Now().Unix()
 						ctx := context.Background()
-						items, err := tx.ZRevRangeByScore(ctx, dq.zsetName, &redis.ZRangeBy{
+						items, err := tx.ZRangeByScore(ctx, dq.zsetName, &redis.ZRangeBy{
 							Min: "0", Max: strconv.FormatInt(now, 10), Offset: 0, Count: dq.migrationCount,
 						}).Result()
 						if err != nil {
